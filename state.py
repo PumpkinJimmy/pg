@@ -14,7 +14,7 @@ class State:
     def enter(self):
         pass
 
-    def update(self, surface, events, *args, **kwargs):
+    def update(self, events):
         for event in events:
             if event.type == pygame.QUIT:
                 self.on_quit()

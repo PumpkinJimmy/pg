@@ -50,6 +50,7 @@ class App:
         self.config.update(config)
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode(self.screen_size)
+        self.rect = self.screen.get_rect()
         pygame.display.set_caption(self.caption)
         self.screen.fill(self.bgcolor)
         pygame.display.flip()
@@ -65,8 +66,7 @@ class App:
 
     def update(self):
         events = pygame.event.get()
-
-        self.__state.update(self.screen, events)
+        self.__state.update(events)
         if self.__next_state != self.__state:
             self.__state.exit()
             self.__next_state.enter()
