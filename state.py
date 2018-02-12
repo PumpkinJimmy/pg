@@ -1,11 +1,9 @@
 import pygame
-from core import App
+import core
 class State:
     """
-    状态
-    处理，事件与渲染
-    可以进行状态转移
-    管理下属对象
+    状态基类
+    进行状态转移、处理
     """
 
     def __init__(self):
@@ -23,4 +21,4 @@ class State:
         pass
 
     def on_quit(self):
-        App.instance().quit()
+        core.get_app().quit()

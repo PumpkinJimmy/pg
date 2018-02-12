@@ -1,5 +1,6 @@
 import sys
 import pygame
+from utils import ConfigDict
 
 
 class App:
@@ -15,12 +16,12 @@ class App:
     class AppException(Exception):
         pass
 
-    default_config = {
+    default_config = ConfigDict({
         'tick': 60,
         'screen_size': (800, 600),
         'bgcolor': (255, 255, 255),
         'caption': "App",
-    }
+    })
     __instance = None
 
     @classmethod
@@ -46,7 +47,7 @@ class App:
         pygame.font.init()
         self.config = self.default_config
         if config is None:
-            config = {}
+            config = ConfigDict()
         self.config.update(config)
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode(self.screen_size)
@@ -59,6 +60,9 @@ class App:
 
     def update_config(self, config):
         self.config.update(config)
+
+    def set_config(self, **kwargs):
+        self.update_config(kwargs)
 
     def startup(self):
         self.__next_state.enter()
@@ -91,3 +95,11 @@ class App:
     def run_with_state(self, state):
         self.__next_state = state
         return self.run()
+
+
+def get_app():
+    return App.instance()
+
+
+def get_config():
+    return App.instance().config
