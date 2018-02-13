@@ -11,6 +11,9 @@ class AttrDict(dict):
 
     def __setattr__(self, key, value):
         self[key] = value
+    
+    def copy(self):
+        return AttrDict(super(AttrDict, self).copy())
 
 
 from pygame.colordict import THECOLORS

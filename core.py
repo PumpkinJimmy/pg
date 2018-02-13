@@ -2,6 +2,15 @@ import sys
 import pygame
 from utils import ConfigDict
 
+default_config = ConfigDict({
+    'tick': 60,
+    'screen_size': (800, 600),
+    'bgcolor': (255, 255, 255),
+    'caption': "App",
+})
+
+gconfig = default_config.copy()
+
 
 class App:
     """
@@ -16,12 +25,6 @@ class App:
     class AppException(Exception):
         pass
 
-    default_config = ConfigDict({
-        'tick': 60,
-        'screen_size': (800, 600),
-        'bgcolor': (255, 255, 255),
-        'caption': "App",
-    })
     __instance = None
 
     @classmethod
@@ -45,7 +48,7 @@ class App:
         App.__instance = self
         pygame.init()
         pygame.font.init()
-        self.config = self.default_config
+        self.config = gconfig
         if config is None:
             config = ConfigDict()
         self.config.update(config)
@@ -102,4 +105,83 @@ def get_app():
 
 
 def get_config():
-    return App.instance().config
+    return gconfig
+
+
+class DisplayObject:
+    """
+    可视对象
+    """
+
+    def __init__(self):
+        self.image = pygame.Surface((0, 0))
+        self.rect = pygame.Rect((0, 0, 0, 0))
+
+    def display(self, screen):
+        return [screen.blit(self.image, self.rect)]
+
+
+class UpdateObject:
+    """
+    可更新对象
+    """
+
+    def update(self, events):
+        pass
+
+
+class Node(DisplayObject, UpdateObject):
+    """
+    自动显示、更新孩子的节点
+    """
+
+    def __init__(self):
+        DisplayObject.__init__(self)
+        UpdateObject.__init__(self)
+        self.children = []
+        self.update_os = []
+        self.display_os = []
+
+    def add_child(self, child):
+        assert issubclass(type(child), Node)
+        self.children.append(child)
+
+    def add_children(self, *children):
+        for child in children:
+            self.add_child(child)
+
+    def remove_child(self, child):
+        if child in self.children:
+            self.children.remove(child)
+
+    def display(self, screen):
+        rects = []
+        for child in self.children:
+            rects.extend(child.display(screen))
+        for display_o in self.display_os:
+            rects.extend(display_o.display(screen))
+        rects.extend(super(Node, self).display(screen))
+        return rects
+
+    def register_display(self, display_o):
+        assert issubclass(type(display_o), DisplayObject)
+        self.display_os.append(display_o)
+
+    def remove_display(self, display_o):
+        if display_o in self.display_os:
+            self.display_os.remove(display_o)
+
+    def update(self, events):
+        for child in self.children:
+            child.update(events)
+        for update_o in self.update_os:
+            update_o.update(events)
+        super(Node, self).update(events)
+
+    def register_update(self, update_o):
+        assert issubclass(type(update_o), UpdateObject)
+        self.update_os.append(update_o)
+
+    def remove_update(self, update_o):
+        if update_o in self.update_os:
+            self.update_os.remove(update_o)
